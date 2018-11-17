@@ -275,7 +275,7 @@ recognized by `file-expand-wildcards'."
 
 (defun evil-arglist-set-cmd-range ()
   "Set `evil-ex-range' for the current argument list command."
-  (setq evil-ex-range (evil-range (point-min) (point-max)))
+  (setq evil-ex-range (evil-ex-full-range))
   (remove-hook 'pre-command-hook 'evil-arglist-set-cmd-range t))
 
 (defun evil-arglist-do-cmd (cmd)
