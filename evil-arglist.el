@@ -47,7 +47,7 @@
 ;;
 ;;     :p
 ;;
-;; Delete all files on the argument list
+;; Delete all files from the argument list
 ;;
 ;;     :argd *
 ;;
