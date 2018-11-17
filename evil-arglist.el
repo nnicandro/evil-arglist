@@ -65,11 +65,11 @@
 
 ;;; Code:
 
+(require 'evil)
+
 (defgroup evil-arglist nil
   "Argument lists in Evil."
   :group 'evil)
-
-(require 'evil)
 
 (defvar evil-arglist nil
   "The global argument list.
