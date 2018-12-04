@@ -90,10 +90,15 @@ ARGS.")
          (if files (nconc files (list file))
            (list file)))))))
 
+(defun evil-arglist-rewind-safe ()
+  "Call `evil-arglist-rewind' if files exist on the arglist."
+  (unless (zerop (evil-arglist-length))
+    (evil-arglist-rewind)))
+
 ;; When `command-line-functions' is called, argi can only ever be parsed as a
 ;; file name.
 (add-hook 'command-line-functions 'evil-arglist-construct-initial)
-(add-hook 'emacs-startup-hook 'evil-arglist-rewind)
+(add-hook 'emacs-startup-hook 'evil-arglist-rewind-safe)
 
 ;;; Manipulating the argument list
 
