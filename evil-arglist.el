@@ -313,7 +313,7 @@ COUNT is omitted, insert NAMES after the current argument. If
 NAMES is omitted, add the `buffer-file-name' of the
 `current-buffer'."
   (interactive "<c><f+>")
-  (let* ((arglist (evil-get-arglist))
+  (let* ((arglist (evil-arglist-get))
          (idx (car arglist))
          (files (cdr arglist)))
     (setq names (if names (mapcar #'expand-file-name names)
