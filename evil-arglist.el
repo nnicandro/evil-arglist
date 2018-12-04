@@ -1,12 +1,12 @@
-;; evil-arglist.el --- Add argument lists to Evil -*- lexical-binding: t -*-
+;;; evil-arglist.el --- Add argument lists to Evil -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2018 Nathaniel Nicandro
 
 ;; Author: Nathaniel Nicandro <nathanielnicandro@gmail.com>
 ;; Created: 17 Nov 2018
 ;; Version: 0.0.1
-;; Keywords: evil
-;; Package-Requires: ((evil "1.2.13"))
+;; Keywords: emulations
+;; Package-Requires: ((emacs "24.3") (evil "1.2.13"))
 ;; URL: https://github.com/dzop/evil-arglist
 
 ;; This program is free software; you can redistribute it and/or
