@@ -407,12 +407,12 @@ COUNT has the same meaning as in `evil-arglist-add'."
   (evil-arglist-previous))
 
 (defadvice evil-ex-replace-special-filenames (around evil-arglist activate)
-  (let ((arglist (cdr (evil-arglist-get))))
-    (when arglist
+  (let ((files (cdr (evil-arglist-get))))
+    (when files
       (ad-set-arg
        0 (replace-regexp-in-string
           "\\(?:[[:blank:]]\\|\\`\\)\\(##\\)\\(?:[[:blank:]]\\|\\'\\)"
-          (mapconcat #'shell-quote-argument arglist " ") (ad-get-arg 0)
+          (mapconcat #'shell-quote-argument files " ") (ad-get-arg 0)
           t t 1)))
     ad-do-it))
 
