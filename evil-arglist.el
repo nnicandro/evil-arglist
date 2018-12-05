@@ -234,6 +234,30 @@ identical to `split-window-internal'."
 (evil-ex-define-cmd "wN[ext]" 'evil-arglist-write-previous)
 (evil-ex-define-cmd "wp[revious]" 'evil-arglist-write-previous)
 
+(defun evil-arglist-files-from-patterns (patterns)
+  "Return a list of all files that match PATTERNS.
+Any PATTERNS equal to \"%\" are replaced with the
+`current-buffer's file name if one exists, otherwise the pattern
+is ignored.
+
+For every other pattern, the wildcards are expanded into lists of
+files and those files appended together. If a pattern does not
+contain any wildcards, it is added to the resulting list without
+modification."
+  (apply #'append
+         (cl-loop
+          ;; From `wildcard-to-regexp'
+          with wildcard-re = "[[.*+\\^$?]"
+          with buf = (buffer-base-buffer)
+          for pat in patterns
+          if (and (equal pat "%") (buffer-file-name buf))
+          collect (list (buffer-file-name buf))
+          else collect
+          (if (string-match-p wildcard-re pat)
+              (cl-remove-if-not #'file-regular-p
+                                (file-expand-wildcards pat 'abs))
+            (list pat)))))
+
 (evil-define-command evil-arglist (&optional patterns)
   "Show the current argument list or set it to the files matching PATTERN.
 If PATTERN is empty, show the current argument list. Otherwise
@@ -253,14 +277,9 @@ recognized by `file-expand-wildcards'."
                   (if (eq curr arg) (concat "[" file "]") file)))
               args
               " ")))))
-    (let ((files (apply #'append
-                        (cl-loop
-                         for pat in (split-string patterns)
-                         if (equal pat "%") collect (list (buffer-file-name))
-                         else collect (or (file-expand-wildcards pat 'abs)
-                                          ;; If no wildcards match, Vim assumes
-                                          ;; the pattern is a file
-                                          (list pat))))))
+    (let ((files (evil-arglist-files-from-patterns (split-string patterns))))
+      (unless files
+        (user-error "No matching files"))
       (evil-arglist-set files)
       (evil-arglist-do-edit 0))))
 
