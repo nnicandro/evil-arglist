@@ -195,7 +195,9 @@ identical to `split-window-internal'."
      (number #'evil-goto-line)
      (forward #'(progn
                   (evil-goto-line 1)
-                  $1))
+                  (let ((pos $1))
+                    (when pos
+                      (goto-char pos)))))
      ;; TODO: Test this regex it probably doesn't work as intended.
      ;;
      ;; We are trying to consider '\ ' and '\\' as part of the command
