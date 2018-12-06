@@ -198,21 +198,27 @@ identical to `split-window-internal'."
                   (let ((pos $1))
                     (when pos
                       (goto-char pos)))))
-     ;; TODO: Test this regex it probably doesn't work as intended.
-     ;;
-     ;; We are trying to consider '\ ' and '\\' as part of the command
-     ;; argument.
-     (command "\\(?:[^ \\]\\|[\\] \\|\\\\[^ ]\\)+"
-              #'evil-ex-call-command))
     ,@(cl-remove-if (lambda (x) (eq (car x) 'expression)) evil-ex-grammar)))
+     (command "\\(?:\\(?:[\\][\\]\\)*[\\] \\|[^\\ ]\\|\\(?:[\\][\\]\\)+\\)+"
+              #'(evil-ex-call-command nil $1 $2)))
+
+(defun evil-arglist-split-escaped-space (str)
+  "Split STR into a space separated list, considering escaped spaces."
+  (save-match-data
+    (cl-loop
+     with start = 0
+     if (string-match "\\(?:\\([\\][\\]\\)+\\|\\([^\\]\\)\\)[ ]+" str)
+     collect (substring str start (match-end 1)) into result
+     and do (setq start (match-end 0)
+                  str (substring str (match-end 0)))
+     else collect str into result and return result)))
 
 (evil-define-interactive-code "<f+>"
   "Ex repeated file argument."
   :ex-arg file+
   (list (when (evil-ex-p)
-          ;; TODO: File names with spaces
           (let ((args (evil-ex-file-arg)))
-            (and args (split-string args))))))
+            (and args (evil-arglist-split-escaped-space args))))))
 
 (evil-define-interactive-code "<cmd>"
   "Ex command argument."
@@ -234,8 +240,8 @@ identical to `split-window-internal'."
   "Enable completing a list of file names in Ex."
   (save-excursion
     (goto-char (point-max))
-    (if (re-search-backward "[^\\] " nil t)
-        (list (+ (point) 2) (point-max) 'read-file-name-internal)
+    (if (re-search-backward "\\(?:\\([\\][\\]\\)+\\|\\([^\\]\\)\\)[ ]+" nil t)
+        (list (+ (match-end 0) 2) (point-max) 'read-file-name-internal)
       (list (or (and evil-ex-argument
                      (get-text-property 0 'ex-index evil-ex-argument))
                 (point-min))
