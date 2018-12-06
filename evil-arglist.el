@@ -193,9 +193,7 @@ identical to `split-window-internal'."
   "Ex command argument."
   (list
    (when (evil-ex-p)
-     (let ((expr (evil-ex-parse evil-ex-argument)))
-       (if (eq (car expr) 'evil-ex-call-command) expr
-         (when expr (user-error "Invalid expression")))))))
+     (evil-ex-parse evil-ex-argument nil 'expression))))
 
 (defun evil-arglist-ex-repeated-file-argument-completion ()
   "Enable completing a list of file names in Ex."
