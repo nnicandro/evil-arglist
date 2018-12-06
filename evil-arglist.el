@@ -181,6 +181,29 @@ identical to `split-window-internal'."
 
 ;;; Interactive codes
 
+(defvar evil-arglist-grammar
+  `((expression
+     (count command argument #'evil-ex-call-command)
+     ((\? range) command (\? ("\\+" +command #'$2)) argument
+      #'(progn
+          (evil-ex-call-command $1 $2 $4)
+          $3))
+     (line #'evil-goto-line)
+     (sexp #'eval-expression))
+    (+command
+     (space #'(evil-goto-line))
+     (number #'evil-goto-line)
+     (forward #'(progn
+                  (evil-goto-line 1)
+                  $1))
+     ;; TODO: Test this regex it probably doesn't work as intended.
+     ;;
+     ;; We are trying to consider '\ ' and '\\' as part of the command
+     ;; argument.
+     (command "\\(?:[^ \\]\\|[\\] \\|\\\\[^ ]\\)+"
+              #'evil-ex-call-command))
+    ,@(cl-remove-if (lambda (x) (eq (car x) 'expression)) evil-ex-grammar)))
+
 (evil-define-interactive-code "<f+>"
   "Ex repeated file argument."
   :ex-arg file+
@@ -194,6 +217,15 @@ identical to `split-window-internal'."
   (list
    (when (evil-ex-p)
      (evil-ex-parse evil-ex-argument nil 'expression))))
+
+(evil-define-interactive-code "<+cmd>"
+  "Ex +command argument."
+  (list
+   (when (and (evil-ex-p) evil-ex-argument
+              (eq (aref evil-ex-argument 0) ?+))
+     (let ((res (evil-parser evil-ex-argument '+command evil-arglist-grammar)))
+       (prog1 (car res)
+         (setq evil-ex-argument (cdr res)))))))
 
 (defun evil-arglist-ex-repeated-file-argument-completion ()
   "Enable completing a list of file names in Ex."
@@ -256,14 +288,16 @@ modification."
                                 (file-expand-wildcards pat 'abs))
             (list pat)))))
 
-(evil-define-command evil-arglist (&optional patterns)
+(evil-define-command evil-arglist (&optional cmd patterns _bang)
   "Show the current argument list or set it to the files matching PATTERN.
 If PATTERN is empty, show the current argument list. Otherwise
 set the argument list to the list of files matching PATTERN in
 the current directory. PATTERN can be any wildcard pattern
 recognized by `file-expand-wildcards'."
   :repeat nil
-  (interactive "<a>")
+  (interactive "<+cmd><a><!>")
+  (when patterns
+    (setq patterns (split-string patterns)))
   (if (zerop (length patterns))
       (when (evil-arglist-get)
         (cl-destructuring-bind (_ . args) (evil-arglist-get)
@@ -275,11 +309,13 @@ recognized by `file-expand-wildcards'."
                   (if (eq curr arg) (concat "[" file "]") file)))
               args
               " ")))))
-    (let ((files (evil-arglist-files-from-patterns (split-string patterns))))
+    (let ((files (evil-arglist-files-from-patterns patterns)))
       (unless files
         (user-error "No matching files"))
       (evil-arglist-set files)
-      (evil-arglist-do-edit 0))))
+      (evil-arglist-do-edit 0)
+      (when cmd
+        (eval cmd)))))
 
 (evil-define-command evil-arglist-local (pattern)
   "Make a local copy of the argument list for the `selected-window'."
