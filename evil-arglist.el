@@ -411,44 +411,54 @@ position on the argument list."
           collect file)
        files))))
 
-(evil-define-command evil-arglist-edit (count names)
+(evil-define-command evil-arglist-edit (count cmd names)
   "Add NAMES to the argument list.
 COUNT has the same meaning as in `evil-arglist-add'."
-  (interactive "<c><f+>")
+  (interactive "<c><+cmd><f+>")
   (unless names (user-error "Argument required"))
   (evil-arglist-add count names)
   (if count (evil-arglist-do-edit (1- count))
-    (evil-arglist-next)))
+    (evil-arglist-next))
+  (when cmd
+    (eval cmd)))
 
 (evil-define-command evil-arglist-argument (count &optional cmd)
   "Edit the COUNT argument, evaluate CMD."
   :keep-visual nil
-  (interactive "<c><cmd>")
+  (interactive "<c><+cmd>")
   (and count (setq count (1- count)))
   (evil-arglist-do-edit (or count 0) (not count))
   (when cmd
-    (evil-arglist-do-cmd cmd)))
+    (eval cmd)))
 
-(evil-define-command evil-arglist-next (&optional count pattern)
+(evil-define-command evil-arglist-next (&optional count cmd pattern)
   "Edit the COUNT next file on the argument list after the current one."
-  (interactive "<c><a>")
+  (interactive "<c><+cmd><a>")
   (if pattern (evil-arglist pattern)
-    (evil-arglist-do-edit (or count 1) 'relative)))
+    (evil-arglist-do-edit (or count 1) 'relative))
+  (when cmd
+    (eval cmd)))
 
-(evil-define-command evil-arglist-previous (&optional count)
+(evil-define-command evil-arglist-previous (&optional count cmd)
   "Edit the COUNT previous file on the argument list before the current one."
-  (interactive "<c>")
-  (evil-arglist-do-edit (- (or count 1)) 'relative))
+  (interactive "<c><+cmd>")
+  (evil-arglist-do-edit (- (or count 1)) 'relative)
+  (when cmd
+    (eval cmd)))
 
-(evil-define-command evil-arglist-rewind ()
+(evil-define-command evil-arglist-rewind (&optional cmd)
   "Edit the first file on the argument list."
-  (interactive)
-  (evil-arglist-do-edit 0))
+  (interactive "<+cmd>")
+  (evil-arglist-do-edit 0)
+  (when cmd
+    (eval cmd)))
 
-(evil-define-command evil-arglist-last ()
+(evil-define-command evil-arglist-last (&optional cmd)
   "Edit the last file on the argument list."
-  (interactive)
-  (evil-arglist-do-edit (1- (evil-arglist-length))))
+  (interactive "<+cmd>")
+  (evil-arglist-do-edit (1- (evil-arglist-length)))
+  (when cmd
+    (eval cmd)))
 
 (evil-define-command evil-arglist-write-next (file)
   "Save the current FILE, edit the next file on the argument list."
