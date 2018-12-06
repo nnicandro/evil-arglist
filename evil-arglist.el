@@ -159,7 +159,7 @@ If RELATIVE is non-nil, edit the COUNT argument relative to the
 current one. Update the currently edited argument in the argument
 list."
   (when (evil-arglist-get)
-    (let* ((arg (evil-arglist-nth count relative)))
+    (let ((arg (evil-arglist-nth count relative)))
       (unless arg
         (user-error
          (if (> count 0) "Cannot go beyond last file"
