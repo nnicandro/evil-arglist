@@ -42,6 +42,12 @@ Revert changes made from a previous `:argdo`
 
     :argdo edit!
 
+# Substitue `##` with the arglist in Ex
+
+Support is also added for the special file name `##` which will be replaced
+with a concatentation of all the files in the argument list, separated by
+spaces, when it appears in an Ex command.
+
 # `:argdo` and Ex ranges
 
 When using `:argdo`, `evil-ex-range` is set to encompase the whole buffer. This
