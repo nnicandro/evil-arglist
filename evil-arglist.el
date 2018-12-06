@@ -334,25 +334,6 @@ recognized by `file-expand-wildcards'."
   (when pattern
     (evil-arglist pattern)))
 
-(defun evil-arglist-set-cmd-range ()
-  "Set `evil-ex-range' for the current argument list command."
-  (setq evil-ex-range (evil-ex-full-range))
-  (remove-hook 'pre-command-hook 'evil-arglist-set-cmd-range t))
-
-(defun evil-arglist-do-cmd (cmd)
-  "Evaluate CMD for the current buffer.
-CMD is an `evil-ex-call-command' form as returned by
-`evil-ex-parse'."
-  ;; Ensure that `evil-ex-call-command' doesn't set the visual region
-  (let (evil-ex-range)
-    ;; But ensure that if CMD is another Ex command, it operates on the whole
-    ;; buffer.
-    ;;
-    ;; FIXME: This has some issues since commands like :w do something
-    ;; differently if `evil-ex-range' is non-nil vs when it is nil.
-    (add-hook 'pre-command-hook 'evil-arglist-set-cmd-range nil t)
-    (eval cmd)))
-
 (evil-define-command evil-arglist-do (cmd)
   "Go to the start of the argument list, evaluate CMD for each file on the list.
 Each file visited and set as the current buffer before CMD is
@@ -360,7 +341,7 @@ evaluated."
   (interactive "<cmd>")
   (dotimes (i (evil-arglist-length))
     (evil-arglist-do-edit i)
-    (evil-arglist-do-cmd cmd)))
+    (eval cmd)))
 
 (evil-define-command evil-arglist-add (count names)
   "Add NAMES to the argument list.
