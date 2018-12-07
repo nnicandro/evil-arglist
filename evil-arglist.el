@@ -182,25 +182,18 @@ identical to `split-window-internal'."
 ;;; Interactive codes
 
 (defvar evil-arglist-grammar
-  `((expression
-     (count command argument #'evil-ex-call-command)
-     ((\? range) command (\? ("\\+" +command #'$2)) argument
-      #'(progn
-          (evil-ex-call-command $1 $2 $4)
-          $3))
-     (line #'evil-goto-line)
-     (sexp #'eval-expression))
-    (+command
-     (space #'(evil-goto-line))
-     (number #'evil-goto-line)
-     (forward #'(progn
-                  (evil-goto-line 1)
-                  (let ((pos $1))
-                    (when pos
-                      (goto-char pos)))))
-    ,@(cl-remove-if (lambda (x) (eq (car x) 'expression)) evil-ex-grammar)))
-     (command "\\(?:\\(?:[\\][\\]\\)*[\\] \\|[^\\ ]\\|\\(?:[\\][\\]\\)+\\)+"
-              #'(evil-ex-call-command nil $1 $2)))
+  `((+command
+     (space #''(evil-goto-line))
+     (number #''(evil-goto-line $1))
+     (forward #''(progn
+                   (evil-goto-line 1)
+                   (let ((pos $1))
+                     (when pos
+                       (goto-char pos)))))
+     ;; Allow escaped spaces '\ ' as part of the argument.
+     (command "\\(?:\\\\\\\\\\|\\\\[^\\\\]\\|[^\\\\ ]\\)+"
+              #''(evil-ex-call-command nil $1 $2)))
+    ,@evil-ex-grammar))
 
 (defun evil-arglist-split-escaped-space (str)
   "Split STR into a space separated list, considering escaped spaces."
