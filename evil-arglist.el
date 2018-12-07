@@ -199,12 +199,11 @@ identical to `split-window-internal'."
   "Split STR into a space separated list, considering escaped spaces."
   (save-match-data
     (cl-loop
-     with start = 0
-     if (string-match "\\(?:\\([\\][\\]\\)+\\|\\([^\\]\\)\\)[ ]+" str)
-     collect (substring str start (match-end 1)) into result
-     and do (setq start (match-end 0)
-                  str (substring str (match-end 0)))
-     else collect str into result and return result)))
+     if (string-match "\\(\\(?:\\\\\\\\\\|\\\\[^\\\\]\\|[^\\\\ ]\\)+\\)" str)
+     collect (match-string 1 str) into result
+     and do (setq str (substring str (match-end 0)))
+     else unless (equal str "") collect str into result end
+     and return result)))
 
 (evil-define-interactive-code "<f+>"
   "Ex repeated file argument."
@@ -233,7 +232,7 @@ identical to `split-window-internal'."
   "Enable completing a list of file names in Ex."
   (save-excursion
     (goto-char (point-max))
-    (if (re-search-backward "\\(?:\\([\\][\\]\\)+\\|\\([^\\]\\)\\)[ ]+" nil t)
+    (if (re-search-backward "\\(?:\\(\\\\\\\\\\)+\\|\\([^\\\\]\\)\\)[ ]+" nil t)
         (list (+ (match-end 0) 2) (point-max) 'read-file-name-internal)
       (list (or (and evil-ex-argument
                      (get-text-property 0 'ex-index evil-ex-argument))
