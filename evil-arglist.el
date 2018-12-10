@@ -57,7 +57,7 @@
 ;;
 ;; Search and replace
 ;;
-;;     :argdo s/vim/emacs/g
+;;     :argdo %s/vim/emacs/g
 ;;
 ;; Revert changes made from a previous :argdo
 ;;
@@ -193,7 +193,8 @@ identical to `split-window-internal'."
      ;; Allow escaped spaces '\ ' as part of the argument.
      (command "\\(?:\\\\\\\\\\|\\\\[^\\\\]\\|[^\\\\ ]\\)+"
               #''(evil-ex-call-command nil $1 $2)))
-    ,@evil-ex-grammar))
+    ,@evil-ex-grammar)
+  "Additional grammar to support the <+cmd> interactive code.")
 
 (defun evil-arglist-split-escaped-space (str)
   "Split STR into a space separated list, considering escaped spaces."
@@ -423,7 +424,8 @@ COUNT has the same meaning as in `evil-arglist-add'."
     (eval cmd)))
 
 (evil-define-command evil-arglist-argument (count &optional cmd)
-  "Edit the COUNT argument, evaluate CMD."
+  "Edit the COUNT argument, evaluate CMD.
+If a COUNT is not provided, default to the current argument."
   :keep-visual nil
   (interactive "<c><+cmd>")
   (and count (setq count (1- count)))
