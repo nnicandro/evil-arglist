@@ -183,16 +183,16 @@ identical to `split-window-internal'."
 
 (defvar evil-arglist-grammar
   `((+command
-     (space #''(evil-goto-line))
-     (number #''(evil-goto-line $1))
-     (forward #''(progn
-                   (evil-goto-line 1)
-                   (let ((pos $1))
-                     (when pos
-                       (goto-char pos)))))
+     (space #'(evil-goto-line))
+     (number #'(evil-goto-line $1))
+     (forward #'(progn
+                  (evil-goto-line 1)
+                  (let ((lno $1))
+                    (when lno
+                      (evil-goto-line lno)))))
      ;; Allow escaped spaces '\ ' as part of the argument.
      (command "\\(?:\\\\\\\\\\|\\\\[^\\\\]\\|[^\\\\ ]\\)+"
-              #''(evil-ex-call-command nil $1 $2)))
+              #'(evil-ex-call-command nil $1 $2)))
     ,@evil-ex-grammar)
   "Additional grammar to support the <+cmd> interactive code.")
 
