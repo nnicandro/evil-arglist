@@ -225,8 +225,10 @@ identical to `split-window-internal'."
   (list
    (when (and (evil-ex-p) evil-ex-argument
               (eq (aref evil-ex-argument 0) ?+))
-     (let ((res (evil-parser (substring evil-ex-argument 1)
-                             '+command evil-arglist-grammar)))
+     (let ((res (evil-parser
+                 ;; Ensure an empty argument will get parsed as a space
+                 (concat (substring evil-ex-argument 1) " ")
+                 '+command evil-arglist-grammar)))
        (prog1 (car res)
          (setq evil-ex-argument (cdr res)))))))
 
