@@ -183,16 +183,18 @@ identical to `split-window-internal'."
 
 (defvar evil-arglist-grammar
   `((+command
-     (space #'(evil-goto-line))
-     (number #'(evil-goto-line $1))
-     (forward #'(progn
-                  (evil-goto-line 1)
-                  (let ((lno $1))
-                    (when lno
-                      (evil-goto-line lno)))))
+     ("\\+" number #'(evil-goto-line $2))
+     ("\\+" forward #'(progn
+                        (evil-goto-line 1)
+                        (let ((lno $2))
+                          (when lno
+                            (evil-goto-line lno)))))
      ;; Allow escaped spaces '\ ' as part of the argument.
-     (command "\\(?:\\\\\\\\\\|\\\\[^\\\\]\\|[^\\\\ ]\\)+"
-              #'(evil-ex-call-command nil $1 $2)))
+     ("\\+" count command "\\(?:\\\\\\\\\\|\\\\[^\\\\]\\|[^\\\\ ]\\)+"
+      #'(evil-ex-call-command $2 $3 $4))
+     ("\\+" (\? range) command "\\(?:\\\\\\\\\\|\\\\[^\\\\]\\|[^\\\\ ]\\)+"
+      #'(evil-ex-call-command $2 $3 $4))
+     ("\\+" #'(evil-goto-line)))
     ,@evil-ex-grammar)
   "Additional grammar to support the <+cmd> interactive code.")
 
@@ -223,12 +225,8 @@ identical to `split-window-internal'."
 (evil-define-interactive-code "<+cmd>"
   "Ex +command argument."
   (list
-   (when (and (evil-ex-p) evil-ex-argument
-              (eq (aref evil-ex-argument 0) ?+))
-     (let ((res (evil-parser
-                 ;; Ensure an empty argument will get parsed as a space
-                 (concat (substring evil-ex-argument 1) " ")
-                 '+command evil-arglist-grammar)))
+   (when (evil-ex-p)
+     (let ((res (evil-parser evil-ex-argument '+command evil-arglist-grammar)))
        (prog1 (car res)
          (setq evil-ex-argument (cdr res)))))))
 
