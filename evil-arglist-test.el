@@ -1,3 +1,33 @@
+;;; evil-arglist-test.el --- Tests for evil-arglist -*- lexical-binding: t -*-
+
+;; Copyright (C) 2018 Nathaniel Nicandro
+
+;; Author: Nathaniel Nicandro <nathanielnicandro@gmail.com>
+;; Created: 10 Dec 2018
+;; Version: 0.0.1
+;; URL: https://github.com/dzop/evil-arglist
+
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation; either version 2, or (at
+;; your option) any later version.
+
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;; General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs; see the file COPYING.  If not, write to the
+;; Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+;; Boston, MA 02111-1307, USA.
+
+;;; Commentary:
+
+;;
+
+;;; Code:
+
 (require 'evil-arglist)
 (require 'ert)
 
@@ -75,3 +105,34 @@
       (should (equal (evil-ex-replace-special-filenames "## bb") "a b c bb"))
       (should (equal (evil-ex-replace-special-filenames "# ## #")
                      (concat alt " a b c " alt))))))
+
+(ert-deftest evil-arglist-test-+cmd ()
+  (let (cmd)
+    (with-temp-buffer
+      (insert "1\n2\n3")
+      (goto-char (point-min))
+      (setq cmd (car (evil-parser "+" '+command evil-arglist-grammar)))
+      (eval cmd)
+      (should (looking-at "3")))
+    (with-temp-buffer
+      (insert "1\nfoo\n3\n")
+      (goto-char (point-min))
+      (setq cmd (car (evil-parser "+/foo" '+command evil-arglist-grammar)))
+      (eval cmd)
+      (should (looking-at "foo\n")))
+    (with-temp-buffer
+      (insert "1\nfoo\n3\n")
+      (goto-char (point-min))
+      ;; Set this so that `evil-ex-substitute' will work
+      (let ((evil-ex-current-buffer (current-buffer)))
+        (setq cmd (car (evil-parser "+%s/foo/bar" '+command evil-arglist-grammar)))
+        (eval cmd))
+      (should (looking-at "bar\n")))
+    (with-temp-buffer
+      (insert "1\n2\n3\n")
+      (goto-char (point-min))
+      (setq cmd (car (evil-parser "+2" '+command evil-arglist-grammar)))
+      (eval cmd)
+      (should (looking-at "2\n")))))
+
+;;; evil-arglist-test.el ends here
