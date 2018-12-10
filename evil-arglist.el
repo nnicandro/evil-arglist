@@ -214,6 +214,7 @@ identical to `split-window-internal'."
 
 (evil-define-interactive-code "<cmd>"
   "Ex command argument."
+  :ex-arg cmd
   (list
    (when (evil-ex-p)
      (evil-ex-parse evil-ex-argument nil 'expression))))
@@ -228,6 +229,20 @@ identical to `split-window-internal'."
        (prog1 (car res)
          (setq evil-ex-argument (cdr res)))))))
 
+;; For this to work more sufficiently, we would have to use a lot more of the
+;; completion machinery.
+(defun evil-arglist-ex-command-argument-completion ()
+  "Enable completing an Ex command as an argument in Ex."
+  (when evil-ex-argument
+    (let* ((expr (evil-ex-parse evil-ex-argument nil 'expression))
+           (tree (evil-ex-parse evil-ex-argument t 'expression)))
+      (when (eq (car-safe expr) 'evil-ex-call-command)
+        (let ((evil-ex-tree tree)
+              (evil-ex-cmd (eval (nth 2 expr)))
+              (evil-ex-argument (eval (nth 3 expr))))
+          (or (evil-ex-command-completion-at-point)
+              (evil-ex-argument-completion-at-point)))))))
+
 (defun evil-arglist-ex-repeated-file-argument-completion ()
   "Enable completing a list of file names in Ex."
   (save-excursion
@@ -239,6 +254,10 @@ identical to `split-window-internal'."
                 (point-min))
             (point-max)
             'read-file-name-internal))))
+
+(evil-ex-define-argument-type cmd
+  "Ex command argument."
+  :completion-at-point evil-arglist-ex-command-argument-completion)
 
 (evil-ex-define-argument-type file+
   "Handle a repeated file argument."
