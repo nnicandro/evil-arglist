@@ -374,7 +374,9 @@ NAMES is omitted, add the `buffer-file-name' of the
     (setq names (if (not names)
                     (list (buffer-file-name (buffer-base-buffer)))
                   (evil-arglist-files-from-patterns
-                   (evil-arglist-split-escaped-space names))))
+                   (if (stringp names)
+                       (evil-arglist-split-escaped-space names)
+                     names))))
     (evil-arglist-set
      (cond
       ((null files) names)
