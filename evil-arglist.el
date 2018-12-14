@@ -415,7 +415,7 @@ position on the argument list."
        files))))
 
 (evil-define-command evil-arglist-edit (count cmd names)
-  "Add NAMES to the argument list.
+  "Add NAMES to the argument list, then edit the first argument added.
 COUNT has the same meaning as in `evil-arglist-add'."
   (interactive "<c><+cmd><f+>")
   (unless names (user-error "Argument required"))
