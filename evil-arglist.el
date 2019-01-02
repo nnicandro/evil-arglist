@@ -224,11 +224,12 @@ identical to `split-window-internal'."
 
 (evil-define-interactive-code "<+cmd>"
   "Ex +command argument."
-  (list
-   (when (evil-ex-p)
-     (let ((res (evil-parser evil-ex-argument '+command evil-arglist-grammar)))
-       (prog1 (car res)
-         (setq evil-ex-argument (cdr res)))))))
+  (list (when (evil-ex-p)
+          (let ((res (evil-parser
+                      evil-ex-argument '+command evil-arglist-grammar)))
+            (when res
+              (setq evil-ex-argument (cdr res))
+              (car res))))))
 
 ;; For this to work more sufficiently, we would have to use a lot more of the
 ;; completion machinery.
